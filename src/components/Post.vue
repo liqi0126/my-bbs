@@ -6,8 +6,8 @@
         :title="post.userId"
         id="user"
       >
-        <el-avatar shape="square" :size="50">{{ post.nickname[0] }}</el-avatar>
-        <div>{{ post.nickname }}</div>
+        <el-avatar shape="circle" :size="80" class="fig">{{ post.nickname[0] }}</el-avatar>
+        <div class="author-name">{{ post.nickname }}</div>
       </router-link>
     </el-aside>
     <el-container>
@@ -43,8 +43,8 @@
               :title="reply.userId"
               id="user"
             >
-              <el-avatar shape="square" :size="50">{{ reply.nickname[0] }}</el-avatar>
-              <div>{{ reply.nickname }}</div>
+              <el-avatar shape="circle" :size="60" class="reply-fig">{{ reply.nickname[0] }}</el-avatar>
+              <div class="reply-author-name">{{ reply.nickname }}</div>
             </router-link>
           </el-aside>
           <el-main>
@@ -95,7 +95,7 @@
           class="title-input"
         ></el-input>
       </div>
-      <Editor ref="editEditor" style="padding: 0"></Editor>
+      <Editor ref="editEditor" style="padding:0px"></Editor>
       <div slot="footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
         <el-button type="primary" @click="submitEdit()">确 定</el-button>
@@ -105,7 +105,7 @@
 </template>
 
 <script>
-import Editor from '@/components/Editor.vue'
+import Editor from '@/components/wangEditor.vue'
 
 export default {
   props: ['post'],
@@ -226,6 +226,28 @@ export default {
   height: auto;
 }
 
+.fig {
+  font-size: 50px;
+  border: auto;
+  background-color: #4e707a;
+}
+
+.reply-fig {
+  font-size: 40px;
+  border: auto;
+  background-color: #4e707a;
+}
+
+.author-name {
+  font-size: 16px;
+  color: #000000;
+}
+
+.reply-author-name {
+  font-size: 14px;
+  color: #000000;
+}
+
 .post {
   border: 1px solid #e5e5e5;
   width: 1000px;
@@ -236,7 +258,7 @@ export default {
   width: 130px;
   text-align: center;
   padding: 15px;
-  background-color: #d3dce6;
+  background-color: #efeff0;
 }
 
 .reply {

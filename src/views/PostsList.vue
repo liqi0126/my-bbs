@@ -3,18 +3,24 @@
     <div class="loading" v-if="loading">Loading...</div>
     <div v-else>
       <div>
-        <PostHead v-for="post in posts" :key="post.id" :post="post"></PostHead>
-        <el-pagination ref="pagination" :total="total" :current-page.sync="page"></el-pagination>
+        <!-- <PostHead v-for="post in posts" :key="post.id" :post="post"></PostHead> -->
+        <PostsTable :posts="posts"></PostsTable>
+        <el-pagination
+          ref="pagination"
+          :total="total"
+          :current-page.sync="page"
+          @current-change="changePage"
+          :page-size.sync="pageSize"
+          style="margin-top:20px"
+        ></el-pagination>
       </div>
+      <el-divider class="divider">快来发表自己的帖子吧~</el-divider>
       <div id="to-post">
-        <div class="row">
-          <span class="hint">快来发表自己的帖子吧~</span>
-        </div>
         <div class="row">
           <span class="hint">标题:&nbsp;</span>
           <el-input placeholder="建议不超过24个字" v-model="title" clearable class="title-input"></el-input>
         </div>
-        <Editor ref="editor"></Editor>
+        <Editor ref="editor" style="width:60%"></Editor>
         <el-button type="success" icon="el-icon-upload" class="submit" @click="submit">发表</el-button>
       </div>
     </div>
@@ -22,14 +28,16 @@
 </template>
 
 <script>
-import PostHead from '@/components/PostHead.vue'
-import Editor from '@/components/Editor.vue'
+// import PostHead from '@/components/PostHead.vue'
+import PostsTable from '@/components/PostsTable.vue'
+import Editor from '@/components/wangEditor.vue'
 
 export default {
   data () {
     return {
       title: '',
-      page: 0,
+      page: (this.$route.name === 'Home') ? 1 : parseInt(this.$route.params.page),
+      pageSize: 15,
       loading: false,
       total: 0,
       posts: []
@@ -37,31 +45,54 @@ export default {
   },
   components: {
     Editor,
-    PostHead
+    // PostHead,
+    PostsTable
   },
   methods: {
     loadData () {
-      this.$http({
-        url: '/api/v1/post',
-        method: 'get',
-        params: {
-          page: (this.$route.params.page) ? this.$route.params.page : 1,
-          size: 10
-        },
-        headers: {
-          Authorization: this.$store.getters.getToken
+      if (this.$route.params.tags) {
+        const tags = JSON.parse(this.$route.params.tags)
+        const postsByTagDict = this.$store.getters.getPostsByTagDict
+        const tagCount = {}
+        for (const tag of tags) {
+          for (const postId in postsByTagDict[tag]) {
+            if (tagCount[postId]) {
+              tagCount[postId]++
+            } else {
+              tagCount[postId] = 1
+            }
+          }
         }
-      })
-        .then(response => {
-          this.total = response.data.total
-          this.posts = response.data.posts
-          this.loading = false
-        })
-        .catch(error => {
-          console.log(error)
-        })
+        this.posts = []
+        for (const postId in tagCount) {
+          if (tagCount[postId] === tags.length) {
+            this.posts.push(postsByTagDict[tags[0]][postId])
+          }
+        }
 
-      this.page = this.$store.state.currentPage
+        this.total = this.posts.length
+        this.loading = false
+      } else {
+        this.$http({
+          url: '/api/v1/post',
+          method: 'get',
+          params: {
+            page: this.page,
+            size: this.pageSize
+          },
+          headers: {
+            Authorization: this.$store.getters.getToken
+          }
+        })
+          .then(response => {
+            this.total = response.data.total
+            this.posts = response.data.posts
+            this.loading = false
+          })
+          .catch(error => {
+            console.log(error)
+          })
+      }
     },
     submit () {
       this.$http({
@@ -85,8 +116,17 @@ export default {
         })
     },
     changePage () {
-      console.log(this.$refs.pagination)
-      return 0
+      // if (this.$route.name === 'Home' && this.page === 1) {
+      //   return
+      // }
+      // if (this.$route.params.page === this.page.toString()) {
+      //   return
+      // }
+      if (this.$route.params.tags) {
+        this.$router.push(`/postslist/page=${this.page}/${this.$route.params.tags}`)
+      } else {
+        this.$router.push(`/postslist/page=${this.page}`)
+      }
     }
   },
   beforeMount () {
@@ -94,15 +134,7 @@ export default {
     this.loadData()
   },
   watch: {
-    page: function (val) {
-      if (this.$route.name === 'Home' && val === 1) {
-        return
-      }
-      if (this.$route.params.page === val.toString()) {
-
-      }
-      this.$store.commit('setCurrentPage', val)
-      this.$router.push(`/postslist/page=${val}`)
+    $route: function (to, from) {
       this.loading = true
       this.loadData()
     }
@@ -116,8 +148,8 @@ export default {
   width: 100%;
 }
 
-#to-post {
-  margin: 50px;
+.divider {
+  margin-top: 50px;
 }
 
 .row {
@@ -140,6 +172,6 @@ export default {
 }
 
 .submit {
-  margin-top: 45px;
+  margin-top: 20px;
 }
 </style>

@@ -1,10 +1,19 @@
 <template>
   <div id="app">
-    <el-container direction="vertical">
-      <my-header></my-header>
-      <el-main>
-        <router-view :key="$route.fullPath" />
-        <!-- <router-view /> -->
+    <el-container>
+      <el-aside width="15%">
+        <my-aside></my-aside>
+      </el-aside>
+      <el-main style="padding:0">
+        <el-container>
+          <el-header style="padding:0">
+            <my-header></my-header>
+          </el-header>
+          <el-main>
+            <!-- <router-view :key="$route.fullPath" /> -->
+            <router-view />
+          </el-main>
+        </el-container>
       </el-main>
     </el-container>
     <bookMark></bookMark>
@@ -14,6 +23,7 @@
 
 <script>
 import myHeader from './components/Header'
+import myAside from './components/Aside'
 import bookMark from './components/Bookmark'
 import history from './components/History'
 
@@ -21,6 +31,7 @@ export default {
   name: 'app',
   components: {
     myHeader,
+    myAside,
     bookMark,
     history
   }
@@ -33,7 +44,12 @@ export default {
     "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
 }
 
-.el-header #header {
+.el-drawer.ltr {
+  overflow: scroll;
+  background-color: rgb(247, 247, 247);
+}
+
+.el-header {
   padding: 0;
 }
 
@@ -43,6 +59,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  background-color: #ffffff;
 }
 
 #nav {

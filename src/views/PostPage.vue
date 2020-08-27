@@ -3,7 +3,8 @@
     <div v-if="loading">Loading...</div>
     <div v-else>
       <div class="header">
-        <div class="title">{{ title }}</div>
+        <div class="title">{{ title | formatTitle }}</div>
+        <Tags :ableToEdit="true" :post="rootPost"></Tags>
         <el-switch v-model="authorOnly" active-text="只看楼主"></el-switch>
         <el-switch v-model="mark" active-text="收藏"></el-switch>
       </div>
@@ -12,7 +13,7 @@
         <div style="margin-top:20px">
           <div v-if="noMore">没有更多了 囧</div>
           <div v-else>
-            <el-button type="primary" @click="loadMore">加载更多</el-button>
+            <el-button type="text" @click="loadMore">加载更多</el-button>
           </div>
         </div>
       </div>
@@ -20,7 +21,7 @@
         <div class="row">
           <span class="hint">回复楼主</span>
         </div>
-        <Editor ref="editor"></Editor>
+        <Editor ref="editor" style="width:60%"></Editor>
         <el-button type="success" icon="el-icon-upload" class="submit" @click="submit">发表</el-button>
       </div>
     </div>
@@ -29,7 +30,8 @@
 
 <script>
 import Post from '@/components/Post.vue'
-import Editor from '@/components/Editor.vue'
+import Editor from '@/components/wangEditor.vue'
+import Tags from '@/components/Tags.vue'
 
 export default {
   data () {
@@ -38,13 +40,15 @@ export default {
       mark: false,
       loading: false,
       title: '',
+      rootPost: {},
       posts: [],
       showNum: 1
     }
   },
   components: {
     Editor,
-    Post
+    Post,
+    Tags
   },
   computed: {
     noMore () {
@@ -80,6 +84,17 @@ export default {
           // check bookmark
           if (this.$store.getters.getBookmark != null) {
             this.mark = response.data.id in this.$store.getters.getBookmark
+          }
+
+          this.rootPost = {
+            id: response.data.id,
+            postId: response.data.id,
+            title: response.data.title,
+            nickname: response.data.nickname,
+            userId: response.data.userId,
+            content: response.data.content,
+            created: response.data.created,
+            updated: response.data.updated
           }
 
           // add to history

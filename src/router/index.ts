@@ -6,7 +6,7 @@ import PostsList from '../views/PostsList.vue'
 import UserInfo from '../views/UserInfo.vue'
 import PostPage from '../views/PostPage.vue'
 import { component } from 'vue/types/umd'
-
+import QuillEditor from '@/components/QuillEditorTest.vue'
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
@@ -18,7 +18,7 @@ const routes: Array<RouteConfig> = [
     component: PostsList
   },
   {
-    path: '/postslist/page=:page',
+    path: '/postslist/page=:page/:tags?',
     name: 'PostsList',
     meta: { requireAuth: true },
     component: PostsList
@@ -50,7 +50,8 @@ const routes: Array<RouteConfig> = [
   },
   {
     path: '/test',
-    name: 'Test'
+    name: 'Test',
+    component: QuillEditor
   }
 ]
 
