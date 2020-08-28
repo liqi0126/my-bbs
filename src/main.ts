@@ -12,10 +12,10 @@ import 'element-ui/lib/theme-chalk/index.css'
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.css'
 // vue-quill-editor
-// import VueQuillEditor from 'vue-quill-editor'
-// import 'quill/dist/quill.core.css'
-// import 'quill/dist/quill.snow.css'
-// import 'quill/dist/quill.bubble.css'
+import VueQuillEditor from 'vue-quill-editor'
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
 
 Vue.prototype.$http = axios
 
@@ -23,7 +23,7 @@ Vue.config.productionTip = false
 
 Vue.use(Antd)
 Vue.use(ElementUI)
-// Vue.use(VueQuillEditor)
+Vue.use(VueQuillEditor)
 
 router.beforeEach((to, from, next) => {
   store.commit('disableBookmark')

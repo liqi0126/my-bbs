@@ -6,7 +6,9 @@ import PostsList from '../views/PostsList.vue'
 import UserInfo from '../views/UserInfo.vue'
 import PostPage from '../views/PostPage.vue'
 import { component } from 'vue/types/umd'
+
 import QuillEditor from '@/components/QuillEditorTest.vue'
+import Emoji from '@/components/Emoji.vue'
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
@@ -51,7 +53,7 @@ const routes: Array<RouteConfig> = [
   {
     path: '/test',
     name: 'Test',
-    component: QuillEditor
+    component: Emoji
   }
 ]
 
