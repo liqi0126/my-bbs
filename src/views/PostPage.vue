@@ -9,7 +9,13 @@
         <el-switch v-model="mark" active-text="收藏"></el-switch>
       </div>
       <div>
-        <Post @reflesh="loadData" v-for="i in showNum" :key="posts[i-1].id" :post="posts[i-1]"></Post>
+        <Post
+          @reflesh="loadData"
+          v-for="i in showNum"
+          :id="i"
+          :key="posts[i-1].id"
+          :post="posts[i-1]"
+        ></Post>
         <div style="margin-top:20px">
           <div v-if="noMore">没有更多了 囧</div>
           <div v-else>
@@ -21,7 +27,7 @@
         <div class="row">
           <span class="hint">回复楼主</span>
         </div>
-        <Editor ref="editor" style="width:60%"></Editor>
+        <Editor id="postPageEditor" ref="editor"></Editor>
         <el-button type="success" icon="el-icon-upload" class="submit" @click="submit">发表</el-button>
       </div>
     </div>
@@ -30,7 +36,7 @@
 
 <script>
 import Post from '@/components/Post.vue'
-import Editor from '@/components/wangEditor.vue'
+import Editor from '@/components/QuillEditor.vue'
 import Tags from '@/components/Tags.vue'
 
 export default {
@@ -66,6 +72,7 @@ export default {
       }
     },
     loadData () {
+      this.loading = true
       this.posts = []
       this.$http({
         url: `/api/v1/post/${this.$route.params.id}`,
@@ -240,9 +247,5 @@ export default {
 
 .title-input {
   width: 500px;
-}
-
-.submit {
-  margin-top: 45px;
 }
 </style>

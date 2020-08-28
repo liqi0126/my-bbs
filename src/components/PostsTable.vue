@@ -9,7 +9,7 @@
         <template slot-scope="scope">{{ scope.row.content }}</template>
       </el-table-column>
       <el-table-column label="编号" prop="id" width="80px"></el-table-column>
-      <el-table-column width="600px">
+      <el-table-column width="500px">
         <template slot="header" slot-scope="scope">
           <div v-if="false">{{scope}}</div>
           <el-input v-model="search" placeholder="输入关键词搜索" />
@@ -21,8 +21,7 @@
           >{{ scope.row.title | formatTitle }}</router-link>
         </template>
       </el-table-column>
-      <el-table-column width="160px"></el-table-column>
-      <el-table-column width="80px" align="center" label="作者">
+      <el-table-column width="80px" align="center" label="作者" fixed="right">
         <template slot-scope="scope">
           <router-link
             :to="{ name: 'User', params: scope.row }"
@@ -30,7 +29,7 @@
           >{{ scope.row.nickname }}</router-link>
         </template>
       </el-table-column>
-      <el-table-column width="50px" align="center" label="收藏">
+      <el-table-column width="50px" align="center" label="收藏" fixed="right">
         <template slot-scope="scope">
           <el-button
             v-if="inBookmark(scope.row.id)"
@@ -46,7 +45,7 @@
           ></el-button>
         </template>
       </el-table-column>
-      <el-table-column min-width="50px" align="center" label="标签">
+      <el-table-column width="200px" align="center" fixed="right" label="标签">
         <template slot="header" slot-scope="scope">
           <div v-if="false">{{scope}}</div>
           <el-select v-model="tags" multiple placeholder="选择标签">
@@ -60,6 +59,7 @@
       <el-table-column
         width="120px"
         align="center"
+        fixed="right"
         sortable
         :sort-method="sortByUpdatedTime"
         label="最近更新"
@@ -69,6 +69,7 @@
       <el-table-column
         width="120px"
         align="center"
+        fixed="right"
         sortable
         :sort-method="sortByRepliedTime"
         label="最近回复"

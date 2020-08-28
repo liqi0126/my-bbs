@@ -1,6 +1,6 @@
 <template>
   <div id="login">
-    <h2>欢迎来到 My-BBS</h2>
+    <h2>欢迎来到清软论坛</h2>
     <div class="field">
       <el-input v-model="username" placeholder="用户名" />
     </div>
@@ -41,7 +41,7 @@ export default {
             if (this.$route.query.redirect) {
               this.$router.push(this.$route.query.redirect)
             } else {
-              this.$router.push('/user')
+              this.$router.push('/')
             }
             // TODO: add feature
           }

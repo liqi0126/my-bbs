@@ -12,7 +12,11 @@
     </el-aside>
     <el-container>
       <el-main>
-        <span v-html="post.content" class="content"></span>
+        <span
+          @click="handleFigure($event)"
+          v-html="$options.filters.formatEmoji(post.content)"
+          class="content"
+        ></span>
         <el-button
           v-if="myPost(post.userId)"
           type="text"
@@ -23,7 +27,7 @@
         <el-collapse style="flex: 1">
           <el-collapse-item>
             <div>
-              <Editor ref="rootEditor" style="padding: 0"></Editor>
+              <Editor :id="`postEditor${post.id}`" ref="rootEditor"></Editor>
               <el-button
                 type="success"
                 icon="el-icon-upload"
@@ -57,7 +61,11 @@
                   id="user"
                 >{{reply.repliedUser}}</router-link>&nbsp;说:&nbsp;
               </span>
-              <span v-html="reply.content" class="content"></span>
+              <span
+                @click="handleFigure($event)"
+                v-html="$options.filters.formatEmoji(reply.content)"
+                class="content"
+              ></span>
               <el-button
                 v-if="myPost(reply.userId)"
                 type="text"
@@ -69,7 +77,7 @@
             <el-collapse>
               <el-collapse-item>
                 <div>
-                  <Editor ref="childEditor" style="padding: 0"></Editor>
+                  <Editor :id="`subPostEditor${reply.id}`" ref="childEditor" style="padding: 0"></Editor>
                   <el-button
                     type="success"
                     icon="el-icon-upload"
@@ -84,6 +92,7 @@
         </el-container>
       </el-footer>
     </el-container>
+
     <el-dialog title="编辑" :visible.sync="dialogEditVisible" custom-class="dialog">
       <div v-if="post.id === 0" class="row">
         <span class="hint">标题:&nbsp;</span>
@@ -95,7 +104,7 @@
           class="title-input"
         ></el-input>
       </div>
-      <Editor ref="editEditor" style="padding:0px"></Editor>
+      <Editor :id="`editEditor${post.id}`" ref="editEditor" style="padding:0px"></Editor>
       <div slot="footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
         <el-button type="primary" @click="submitEdit()">确 定</el-button>
@@ -105,10 +114,10 @@
 </template>
 
 <script>
-import Editor from '@/components/wangEditor.vue'
+import Editor from '@/components/QuillEditor.vue'
 
 export default {
-  props: ['post'],
+  props: ['post', 'id'],
   components: {
     Editor
   },
@@ -121,6 +130,21 @@ export default {
   },
   // inject: ['reload'],
   methods: {
+    handleFigure (e) {
+      if (e.target.tagName === 'IMG') {
+        if (e.target.style.maxWidth === '500px') {
+          e.target.style.maxWidth = '99999px'
+        } else {
+          e.target.style.maxWidth = '500px'
+        }
+        if (e.target.style.maxHeight === '500px') {
+          e.target.style.maxHeight = '99999px'
+        } else {
+          e.target.style.maxHeight = '500px'
+        }
+      }
+    },
+
     myPost (id) {
       return this.$store.getters.getUserId === id.toString()
     },
@@ -222,6 +246,12 @@ export default {
 </script>
 
 <style scoped>
+.content >>> img {
+  max-width: 500px;
+  max-height: 500px;
+  cursor: pointer;
+}
+
 .editor {
   height: auto;
 }

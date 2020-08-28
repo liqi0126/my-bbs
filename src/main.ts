@@ -42,11 +42,16 @@ router.beforeEach((to, from, next) => {
   }
 })
 
-new Vue({
-  router,
-  store,
-  render: h => h(App)
-}).$mount('#app')
+Vue.filter('formatEmoji', function (str: string) {
+  // eslint-disable-next-line
+  return str.replace(/\[[^\[\]]*\]/g, (emojiText) => {
+    if (store.state.emoji[emojiText]) {
+      return '<img src=' + store.state.emoji[emojiText] + ' />'
+    } else {
+      return emojiText
+    }
+  })
+})
 
 Vue.filter('formatTime', function (str: string) {
   if (!str) return ''
@@ -76,3 +81,9 @@ Vue.filter('formatTitle', function (str: string) {
     return str
   }
 })
+
+new Vue({
+  router,
+  store,
+  render: h => h(App)
+}).$mount('#app')

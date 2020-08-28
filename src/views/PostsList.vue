@@ -20,7 +20,7 @@
           <span class="hint">标题:&nbsp;</span>
           <el-input placeholder="建议不超过24个字" v-model="title" clearable class="title-input"></el-input>
         </div>
-        <Editor ref="editor" style="width:60%"></Editor>
+        <Editor id="postsListEditor" ref="editor"></Editor>
         <el-button type="success" icon="el-icon-upload" class="submit" @click="submit">发表</el-button>
       </div>
     </div>
@@ -30,7 +30,7 @@
 <script>
 // import PostHead from '@/components/PostHead.vue'
 import PostsTable from '@/components/PostsTable.vue'
-import Editor from '@/components/wangEditor.vue'
+import Editor from '@/components/QuillEditor.vue'
 
 export default {
   data () {
@@ -109,6 +109,8 @@ export default {
         .then(response => {
           if (response.status === 200) {
             this.$alert('发布成功!')
+            this.loading = true
+            this.loadData()
           }
         })
         .catch(error => {
@@ -169,9 +171,5 @@ export default {
 
 .title-input {
   width: 500px;
-}
-
-.submit {
-  margin-top: 20px;
 }
 </style>

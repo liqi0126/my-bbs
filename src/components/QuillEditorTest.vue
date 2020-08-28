@@ -1,159 +1,163 @@
+
 <template>
-  <div class="example">
-    <quill-editor ref="myTextEditor" class="editor" v-model="content" :options="editorOption">
-      <div id="toolbar" slot="toolbar">
-        <button class="ql-link"></button>
-        <button class="ql-image"></button>
-        <button class="ql-emoji"></button>
-        <button class="ql-code-block"></button>
-
-        <el-popover ref="popover" placement="top" width="400" v-model="popVisible">
-          <el-button class="ql-image-url" slot="reference" icon="el-icon-upload" />
-          <el-input v-model="imageUrl" placeholder="请输入图片URL"></el-input>
-          <div style="text-align:center;margin-top:10px">
-            <el-button type="success" icon="el-icon-check" round @click="addImageUrl"></el-button>
-            <el-button type="danger" icon="el-icon-delete" round @click="closePopover"></el-button>
-          </div>
-        </el-popover>
-
-        <button @click="codeBlock">
-          <i class="el-icon-edit-outline"></i>
-        </button>
-        <!-- <button @click="emojiShow">
-          <i></i>
-        </button>-->
-      </div>
-    </quill-editor>
-
-    <div class="output ql-snow">
-      <div class="title">Output</div>
-      <div class="ql-editor" v-html="$options.filters.setEmoji(this.content)"></div>
-    </div>
-    <div class="ql-editor" style="display:block">{{ this.content }}</div>
+  <div>
+    <quill-editor
+      class="editor"
+      ref="myTextEditor"
+      v-model="content"
+      :options="editorOption"
+      @change="onEditorChange($event)"
+    ></quill-editor>
   </div>
 </template>
 
 <script>
-// import dedent from 'dedent'
-import { Quill } from 'vue-quill-editor'
-import { container, ImageExtend, QuillWatch } from 'quill-image-extend-module'
-import quillEmoji from 'quill-emoji'
-import 'quill-emoji/dist/quill-emoji.css'
-const testImageAPI = 'https://github.surmon.me/images/'
-const testImageUrl = testImageAPI + 'background.jpg'
-
-// Custom emoji-list
-const emojiList = []
-
-// MDI emojicon instead of default icon
-const emojiIcon = '<svg class="i" viewBox="0 0 24 24"><use href="#emoticon-happy"></use></svg>'
-
-Quill.register('modules/ImageExtend', ImageExtend)
 
 export default {
-  name: 'quill-example-register-modules',
-  title: 'Register modules',
+  props: ['simple'],
   data () {
     return {
-      imageUrl: '',
-      popVisible: false,
-
-      name: 'register-modules-example',
-      content: `
-        <p><span class="ql-emojiblot" data-name="grinning"><span contenteditable="false"><span class="ap ap-grinning">😀</span></span></span></p><p><br></p><p><em>Register </em><a href="https://github.com/contentco/quill-emoji" rel="noopener noreferrer" target="_blank"><em>Quill emoji module</em></a></p><p><br></p><p><em>Register </em><a href="https://github.com/NextBoy/quill-image-extend-module" rel="noopener noreferrer" target="_blank"><em>Quill image extend module</em></a></p>
-        `,
+      visible: false,
+      emoji: false,
+      content: '',
       editorOption: {
-        theme: 'snow',
         modules: {
-          'emoji-shortname': true,
-          'emoji-toolbar': true,
-          'emoji-textarea': true,
-          toolbar: '#toolbar'
-          // toolbar: {
-          //   container: [
-          //     ['link', 'image', 'emoji']
-          //   ],
-          //   handlers: {
-          //     image: function () {
-          //       QuillWatch.emit(this.quill.id)
-          //     }
-          //   }
-          // }
-        }
-      },
-      ImageExtend: {
-        loading: true,
-        name: 'img',
-        action: 'https://github.surmon.me/images/',
-        response: (res) => {
-          return testImageUrl
-        }
+          toolbar: [
+            ['bold', 'italic', 'underline', 'strike'], // 加粗 斜体 下划线 删除线
+            ['blockquote', 'code-block'], // 引用  代码块
+            [{ header: 1 }, { header: 2 }], // 1、2 级标题
+            [{ list: 'ordered' }, { list: 'bullet' }], // 有序、无序列表
+            [{ script: 'sub' }, { script: 'super' }], // 上标/下标
+            [{ indent: '-1' }, { indent: '+1' }], // 缩进
+            // [{'direction': 'rtl'}],                         // 文本方向
+            [{ size: ['small', false, 'large', 'huge'] }], // 字体大小
+            [{ header: [1, 2, 3, 4, 5, 6, false] }], // 标题
+            [{ color: [] }, { background: [] }], // 字体颜色、字体背景颜色
+            // [{ font: [] }], // 字体种类
+            [{ align: [] }], // 对齐方式
+            ['clean'], // 清除文本格式
+            ['link', 'image', 'video'] // 链接、图片、视频
+          ] // 工具菜单栏配置
+        },
+        placeholder: '在这里编写帖子内容', // 提示
+        readyOnly: false, // 是否只读
+        theme: 'snow', // 主题 snow/bubble
+        syntax: true // 语法检测
       }
     }
   },
   methods: {
-    addImageUrl () {
-      const quill = this.$refs.myTextEditor.quill
-      const range = quill.selection.savedRange
-      quill.insertEmbed(range.index, 'image', this.imageUrl)
-      this.imageUrl = ''
-      this.popVisible = false
+    // 失去焦点
+    onEditorBlur (editor) {
+      console.log('editor blur!', editor)
     },
-    closePopover () {
-      this.imageUrl = ''
-      this.popVisible = false
+    // 获得焦点
+    onEditorFocus (editor) {
+      console.log('editor blur!', editor)
     },
-    codeBlock () {
-      const quill = this.$refs.myTextEditor.quill
-      const { index, length } = quill.selection.savedRange
-      if (quill.getFormat()['code-block']) {
-        quill.formatLine(index, length, 'code-block', false)
-      } else {
-        quill.formatLine(index, length, 'code-block', true)
-      }
+    // 开始
+    onEditorReady (editor) {
+      console.log('editor ready!', editor)
+    },
+    // 值发生变化
+    onEditorChange (editor) {
+      this.content = editor.html
+    },
+    addEmoji () {
+      this.visible = !this.visible
     }
+
   },
-  filters: {
-    setEmoji: function (msg) {
-      msg = msg.replace('[smile]', `<img src=${require('@/assets/logo.png')} />`)
-      return msg
+  computed: {
+    editor () {
+      return this.$refs.myTextEditor.quillEditor
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
-.example {
-  display: flex;
-  height: 20rem;
-  .editor,
-  .output {
-    width: 50%;
-    height: 100%;
+<style lang='scss'>
+.emoji {
+  float: center;
+}
+
+.editor {
+  line-height: normal !important;
+  margin: auto;
+  margin-top: 10px;
+  margin-bottom: 80px;
+  max-width: 1000px;
+  height: 200px;
+  .ql-snow .ql-tooltip[data-mode="link"]::before {
+    content: "帖子内容:";
   }
-  $toolbar-height: 42px;
-  .editor {
-    padding-bottom: $toolbar-height;
+  .ql-snow .ql-tooltip.ql-editing a.ql-action::after {
+    border-right: 0px;
+    content: "保存";
+    padding-right: 0px;
   }
-  .output {
-    border: none;
-    .title {
-      height: $toolbar-height;
-      line-height: $toolbar-height;
-      padding-left: 0;
-      border-bottom: 1px solid #ccc;
-    }
-    > code {
-      width: 100%;
-      margin: 0;
-      padding: 1rem;
-      border: 1px solid #ccc;
-      border-top: none;
-      border-left: none;
-      border-radius: 0;
-      height: 100%;
-      overflow-y: auto;
-    }
+
+  .ql-snow .ql-tooltip[data-mode="video"]::before {
+    content: "请输入视频地址:";
+  }
+
+  .ql-snow .ql-picker.ql-size .ql-picker-label::before,
+  .ql-snow .ql-picker.ql-size .ql-picker-item::before {
+    content: "14px";
+  }
+  .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="small"]::before,
+  .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="small"]::before {
+    content: "10px";
+  }
+  .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="large"]::before,
+  .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="large"]::before {
+    content: "18px";
+  }
+  .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="huge"]::before,
+  .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="huge"]::before {
+    content: "32px";
+  }
+
+  .ql-snow .ql-picker.ql-header .ql-picker-label::before,
+  .ql-snow .ql-picker.ql-header .ql-picker-item::before {
+    content: "文本";
+  }
+  .ql-snow .ql-picker.ql-header .ql-picker-label[data-value="1"]::before,
+  .ql-snow .ql-picker.ql-header .ql-picker-item[data-value="1"]::before {
+    content: "标题1";
+  }
+  .ql-snow .ql-picker.ql-header .ql-picker-label[data-value="2"]::before,
+  .ql-snow .ql-picker.ql-header .ql-picker-item[data-value="2"]::before {
+    content: "标题2";
+  }
+  .ql-snow .ql-picker.ql-header .ql-picker-label[data-value="3"]::before,
+  .ql-snow .ql-picker.ql-header .ql-picker-item[data-value="3"]::before {
+    content: "标题3";
+  }
+  .ql-snow .ql-picker.ql-header .ql-picker-label[data-value="4"]::before,
+  .ql-snow .ql-picker.ql-header .ql-picker-item[data-value="4"]::before {
+    content: "标题4";
+  }
+  .ql-snow .ql-picker.ql-header .ql-picker-label[data-value="5"]::before,
+  .ql-snow .ql-picker.ql-header .ql-picker-item[data-value="5"]::before {
+    content: "标题5";
+  }
+  .ql-snow .ql-picker.ql-header .ql-picker-label[data-value="6"]::before,
+  .ql-snow .ql-picker.ql-header .ql-picker-item[data-value="6"]::before {
+    content: "标题6";
+  }
+
+  .ql-snow .ql-picker.ql-font .ql-picker-label::before,
+  .ql-snow .ql-picker.ql-font .ql-picker-item::before {
+    content: "标准字体";
+  }
+  .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="serif"]::before,
+  .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="serif"]::before {
+    content: "衬线字体";
+  }
+  .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="monospace"]::before,
+  .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="monospace"]::before {
+    content: "等宽字体";
   }
 }
 </style>

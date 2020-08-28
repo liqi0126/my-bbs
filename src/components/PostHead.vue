@@ -20,16 +20,44 @@
       <div class="time">
         <span>创建于: {{ post.created | formatTime }} 更新于: {{ post.updated | formatTime }}</span>
       </div>
-      <div v-html="post.content" id="content">{{ post.content }}</div>
+      <span
+        @click="handleFigure($event)"
+        v-html="$options.filters.formatEmoji(post.content)"
+        class="content"
+      ></span>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['post']
+  props: ['post'],
+  methods: {
+    handleFigure (e) {
+      if (e.target.tagName === 'IMG') {
+        if (e.target.style.maxWidth === '500px') {
+          e.target.style.maxWidth = '99999px'
+        } else {
+          e.target.style.maxWidth = '500px'
+        }
+        if (e.target.style.maxHeight === '500px') {
+          e.target.style.maxHeight = '99999px'
+        } else {
+          e.target.style.maxHeight = '500px'
+        }
+      }
+    }
+  }
 }
 </script>
+
+<style scoped>
+.content >>> img {
+  max-width: 500px;
+  max-height: 500px;
+  cursor: pointer;
+}
+</style>
 
 <style scoped lang="scss">
 #card {
