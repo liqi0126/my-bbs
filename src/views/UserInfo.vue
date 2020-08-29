@@ -4,18 +4,35 @@
     <div v-else>
       <span class="user">{{ nickname }}</span>
       <p class="post-num">发帖数: {{ total }}</p>
-      <Post v-for="post in posts" :key="post.id" :post="post"></Post>
+      <Post
+        class="post"
+        v-for="i in (loadNum < posts.length) ? loadNum : posts.length"
+        :key="posts[i-1].id"
+        :post="posts[i-1]"
+        style="margin: auto; margin-bottom: 20px"
+      ></Post>
+      <div v-if="loadNum >= posts.length">已经到底啦~</div>
+      <div v-else>
+        <el-button type="text" @click="loadNum += 3">加载更多</el-button>
+      </div>
     </div>
   </div>
 </template>
 
-<style scoped>
+<style lang='scss' scoped>
 .user {
   font-size: 32px;
+  margin-bottom: 10px;
 }
 
 .post-num {
   font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.post {
+  max-width: 1000px;
+  max-height: 1000px;
 }
 </style>
 
@@ -25,11 +42,12 @@ import Post from '@/components/PostHead.vue'
 export default {
   data () {
     return {
-      userId: 0,
+      userId: this.$route.params.userId,
       loading: false,
       total: 0,
       posts: [],
-      nickname: ''
+      nickname: '',
+      loadNum: 5,
     }
   },
   components: {
@@ -60,7 +78,6 @@ export default {
     }
   },
   beforeMount () {
-    this.userId = this.$route.params.userId
     this.loading = true
     this.loadData()
   }

@@ -83,4 +83,17 @@ li {
   margin: 0;
   padding: 0;
 }
+
+a {
+  color: #1890ff;
+  text-decoration: none;
+}
+
+a:visited {
+  color: #1890ff;
+}
+
+a:hover {
+  color: #40a9ff;
+}
 </style>

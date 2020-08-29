@@ -48,7 +48,8 @@ export default {
       title: '',
       rootPost: {},
       posts: [],
-      showNum: 1
+      loadMoreDelta: 15,
+      loadedPostNum: 15,
     }
   },
   components: {
@@ -59,6 +60,21 @@ export default {
   computed: {
     noMore () {
       return this.showNum >= this.posts.length
+    },
+    showNum () {
+      let showNum = 1
+      let postNumForNow = 0
+      let i = 0
+      while (i < this.posts.length) {
+        postNumForNow += 1 + this.posts[i].reply.length
+        i += 1
+        if (postNumForNow <= this.loadedPostNum) {
+          showNum = i
+        } else {
+          return showNum
+        }
+      }
+      return showNum
     }
   },
   methods: {
@@ -66,9 +82,8 @@ export default {
       return 0
     },
     loadMore () {
-      this.showNum = parseInt(this.showNum) + 3
-      if (this.showNum > this.posts.length) {
-        this.showNum = this.posts.length
+      if (this.showNum < this.posts.length) {
+        this.loadedPostNum += this.posts[this.showNum].reply.length + this.loadMoreDelta
       }
     },
     loadData () {
@@ -101,7 +116,8 @@ export default {
             userId: response.data.userId,
             content: response.data.content,
             created: response.data.created,
-            updated: response.data.updated
+            updated: response.data.updated,
+            authorId: response.data.userId
           }
 
           // add to history
@@ -113,6 +129,7 @@ export default {
             content: response.data.content,
             created: response.data.created,
             updated: response.data.updated,
+            authorId: response.data.userId,
             visitTime: new Date().toGMTString()
           })
 
@@ -125,6 +142,7 @@ export default {
             content: response.data.content,
             created: response.data.created,
             updated: response.data.updated,
+            authorId: response.data.userId,
             reply: []
           })
 
@@ -149,6 +167,7 @@ export default {
               content: rep.content,
               created: rep.created,
               updated: rep.updated,
+              authorId: response.data.userId,
               reply: [],
               repliedUser: '',
               repliedUserId: 0
@@ -176,15 +195,15 @@ export default {
             this.posts = authorsPosts
           }
 
-          let totalPostNum = 0
-          let i = 0
-          while (i < this.posts.length) {
-            totalPostNum += 1 + this.posts[i].reply.length
-            i += 1
-            if (totalPostNum <= 15) {
-              this.showNum = i
-            }
-          }
+          // let totalPostNum = 0
+          // let i = 0
+          // while (i < this.posts.length) {
+          //   totalPostNum += 1 + this.posts[i].reply.length
+          //   i += 1
+          //   if (totalPostNum <= 15) {
+          //     this.showNum = i
+          //   }
+          // }
 
           this.loading = false
         })
@@ -210,6 +229,10 @@ export default {
       } else {
         this.$store.commit('removeBookMark', this.posts[0].postId)
       }
+    },
+    $route: function (to, from) {
+      this.loading = true
+      this.loadData()
     }
   }
 }

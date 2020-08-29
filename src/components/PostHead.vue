@@ -35,12 +35,12 @@ export default {
   methods: {
     handleFigure (e) {
       if (e.target.tagName === 'IMG') {
-        if (e.target.style.maxWidth === '500px') {
+        if (e.target.style.maxWidth === '500px' || e.target.style.maxWidth === '') {
           e.target.style.maxWidth = '99999px'
         } else {
           e.target.style.maxWidth = '500px'
         }
-        if (e.target.style.maxHeight === '500px') {
+        if (e.target.style.maxHeight === '500px' || e.target.style.maxHeight === '') {
           e.target.style.maxHeight = '99999px'
         } else {
           e.target.style.maxHeight = '500px'
@@ -105,9 +105,5 @@ export default {
 .time {
   color: #5e5e5e;
   font-size: 12px;
-}
-
-a {
-  color: #303030;
 }
 </style>

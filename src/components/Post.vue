@@ -1,6 +1,7 @@
 <template>
   <el-container class="post">
     <el-aside class="author" width="150px">
+      <div v-if="post.authorId === post.userId" class="post-author">楼主</div>
       <router-link
         :to="{ name: 'User', params: { userId: post.userId}}"
         :title="post.userId"
@@ -12,11 +13,19 @@
     </el-aside>
     <el-container>
       <el-main>
-        <span
-          @click="handleFigure($event)"
-          v-html="$options.filters.formatEmoji(post.content)"
-          class="content"
-        ></span>
+        <div class="main-content">
+          <div class="content-header">
+            <div style="float:left">{{id}} 楼</div>
+            <div
+              style="float:right"
+            >创建于{{post.created | formatTime}}, 更新于{{post.updated | formatTime }}</div>
+          </div>
+          <span
+            @click="handleFigure($event)"
+            v-html="$options.filters.formatEmoji(post.content)"
+            class="content"
+          ></span>
+        </div>
         <el-button
           v-if="myPost(post.userId)"
           type="text"
@@ -24,9 +33,9 @@
           class="edit"
           @click="toEdit(-1, post.id)"
         >编辑</el-button>
-        <el-collapse style="flex: 1">
+        <el-collapse @change="toRenderRootEditor = true" style="margin-top:20px">
           <el-collapse-item>
-            <div>
+            <div v-if="toRenderRootEditor">
               <Editor :id="`postEditor${post.id}`" ref="rootEditor"></Editor>
               <el-button
                 type="success"
@@ -40,8 +49,9 @@
         </el-collapse>
       </el-main>
       <el-footer height="post.reply.length * 100" style="padding: 0">
-        <el-container v-for="(reply, i) in post.reply" :key="i" class="reply">
+        <el-container v-for="(reply, i) in post.reply" :key="reply.id" class="reply">
           <el-aside class="author" width="100px">
+            <div v-if="reply.authorId === reply.userId" class="post-author" style="top:0;right:0">楼主</div>
             <router-link
               :to="{ name: 'User', params: { userId: reply.userId }}"
               :title="reply.userId"
@@ -53,19 +63,26 @@
           </el-aside>
           <el-main>
             <div class="content-container">
-              <span v-if="reply.repliedUser !== ''" class="quote">
-                对
-                <router-link
-                  :to="{ name: 'User', params: { userId: reply.repliedUserId }}"
-                  :title="reply.repliedUserId"
-                  id="user"
-                >{{reply.repliedUser}}</router-link>&nbsp;说:&nbsp;
-              </span>
-              <span
-                @click="handleFigure($event)"
-                v-html="$options.filters.formatEmoji(reply.content)"
-                class="content"
-              ></span>
+              <div class="main-content">
+                <div class="content-header">
+                  <div
+                    style="float:right"
+                  >创建于{{ reply.created | formatTime}}, 更新于{{ reply.updated | formatTime }}</div>
+                </div>
+                <span v-if="reply.repliedUser !== ''" class="quote">
+                  对
+                  <router-link
+                    :to="{ name: 'User', params: { userId: reply.repliedUserId }}"
+                    :title="reply.repliedUserId"
+                    id="user"
+                  >{{reply.repliedUser}}</router-link>&nbsp;说:&nbsp;
+                </span>
+                <span
+                  @click="handleFigure($event)"
+                  v-html="$options.filters.formatEmoji(reply.content)"
+                  class="content"
+                ></span>
+              </div>
               <el-button
                 v-if="myPost(reply.userId)"
                 type="text"
@@ -74,10 +91,14 @@
                 @click="toEdit(i, reply.id)"
               >编辑</el-button>
             </div>
-            <el-collapse>
+            <el-collapse @change="$set(toRenderSubPostEditor, i-1, true)">
               <el-collapse-item>
-                <div>
-                  <Editor :id="`subPostEditor${reply.id}`" ref="childEditor" style="padding: 0"></Editor>
+                <div :key="reply.id" v-if="toRenderSubPostEditor[i-1]">
+                  <Editor
+                    :id="`subPostEditor${reply.id}`"
+                    :ref="`childEditor${i}`"
+                    style="padding: 0"
+                  ></Editor>
                   <el-button
                     type="success"
                     icon="el-icon-upload"
@@ -115,6 +136,7 @@
 
 <script>
 import Editor from '@/components/QuillEditor.vue'
+import Vue from 'vue'
 
 export default {
   props: ['post', 'id'],
@@ -125,19 +147,36 @@ export default {
     return {
       dialogEditVisible: false,
       editId: -1,
-      editTitle: ''
+      editTitle: '',
+      openCollapse: false,
+      toRenderRootEditor: false,
+      toRenderSubPostEditor: [],
+    }
+  },
+  beforeMount () {
+    for (let i in this.post.reply) {
+      this.toRenderSubPostEditor.push(false)
+    }
+  },
+  watch: {
+    openCollapse: function () {
+      console.log(val)
     }
   },
   // inject: ['reload'],
   methods: {
+    toShowSubPostEditor (id) {
+      return this.toRenderSubPostEditor[id]
+    },
+
     handleFigure (e) {
       if (e.target.tagName === 'IMG') {
-        if (e.target.style.maxWidth === '500px') {
+        if (e.target.style.maxWidth === '500px' || e.target.style.maxWidth === '') {
           e.target.style.maxWidth = '99999px'
         } else {
           e.target.style.maxWidth = '500px'
         }
-        if (e.target.style.maxHeight === '500px') {
+        if (e.target.style.maxHeight === '500px' || e.target.style.maxHeight === '') {
           e.target.style.maxHeight = '99999px'
         } else {
           e.target.style.maxHeight = '500px'
@@ -219,8 +258,9 @@ export default {
       if (editorId === -1) {
         content = this.$refs.rootEditor.content
       } else {
-        content = this.$refs.childEditor[editorId].content
+        content = this.$refs[`childEditor${editorId}`][0].content
       }
+
       this.$http({
         url: `/api/v1/post/${this.post.postId}/reply`,
         method: 'post',
@@ -246,10 +286,36 @@ export default {
 </script>
 
 <style scoped>
+.box::-webkit-scrollbar {
+  display: none;
+}
+
+.post-author {
+  text-align: center;
+  line-height: normal;
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  padding: 0 4px;
+  background-color: #f8efef;
+  display: inline-block;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #e97c62;
+}
+
 .content >>> img {
   max-width: 500px;
   max-height: 500px;
   cursor: pointer;
+}
+
+.content-header {
+  font-size: 13px;
+  color: #838383;
+  display: block;
+  line-height: normal;
+  margin-bottom: 30px;
 }
 
 .editor {
@@ -260,6 +326,16 @@ export default {
   font-size: 50px;
   border: auto;
   background-color: #4e707a;
+  margin-top: 20px;
+}
+
+.main-content {
+  max-height: 600px;
+  overflow: scroll;
+}
+
+.main-content::-webkit-scrollbar {
+  display: none;
 }
 
 .reply-fig {
@@ -289,6 +365,7 @@ export default {
   text-align: center;
   padding: 15px;
   background-color: #efeff0;
+  position: relative;
 }
 
 .reply {

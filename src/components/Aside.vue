@@ -134,6 +134,10 @@ a {
   color: #ffffff;
 }
 
+a:visited {
+  color: #ffffff;
+}
+
 a:hover {
   color: #ffffff;
 }

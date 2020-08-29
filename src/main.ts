@@ -9,8 +9,9 @@ import axios from 'axios'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 // Ant Design
-import Antd from 'ant-design-vue'
-import 'ant-design-vue/dist/antd.css'
+// import Antd from 'ant-design-vue'
+// import 'ant-design-vue/dist/antd.css'
+
 // vue-quill-editor
 import VueQuillEditor from 'vue-quill-editor'
 import 'quill/dist/quill.core.css'
@@ -21,7 +22,7 @@ Vue.prototype.$http = axios
 
 Vue.config.productionTip = false
 
-Vue.use(Antd)
+// Vue.use(Antd)
 Vue.use(ElementUI)
 Vue.use(VueQuillEditor)
 
@@ -77,7 +78,7 @@ Vue.filter('formatTime', function (str: string) {
 })
 
 Vue.filter('formatTitle', function (str: string) {
-  if (!str) { return '[无标题]' } else {
+  if (!str || !str.trim()) { return '[无标题]' } else {
     return str
   }
 })
