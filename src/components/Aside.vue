@@ -52,7 +52,10 @@ export default {
             this.lastName = response.data.nickname[0]
           })
           .catch(error => {
-            window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+            console.log(error)
+            if (error.response) {
+              window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+            }
           })
 
         this.$http({
@@ -70,7 +73,10 @@ export default {
             this.myPosts = response.data
           })
           .catch(error => {
-            window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+            console.log(error)
+            if (error.response) {
+              window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+            }
           })
       }
       this.myBrowse = this.$store.getters.getHistory

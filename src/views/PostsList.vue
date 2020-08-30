@@ -103,7 +103,7 @@ export default {
         this.posts = this.totalPosts.splice((this.page - 1) * this.pageSize, this.page * this.pageSize)
 
         this.loading = false
-      } else if (this.keyword !== '') {
+      } else if (this.keyword !== '' || this.order) {
         this.$http({
           url: '/api/v1/post',
           method: 'get',
@@ -119,35 +119,6 @@ export default {
           .then(response => {
             // filter
             this.totalPosts = response.data.posts.filter(data => !this.keyword || data.title.toLowerCase().includes(this.keyword.toLowerCase()))
-            this.total = this.totalPosts.length
-            // sort
-            this.posts = this.totalPosts.sort(this.sortFunction)
-            // pagination
-            this.posts = this.totalPosts.slice((this.page - 1) * this.pageSize, this.page * this.pageSize)
-
-            this.loading = false
-          })
-          .catch(error => {
-            console.log(error)
-            if (error.response) {
-              window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
-            }
-          })
-      } else if (this.order) {
-        this.$http({
-          url: '/api/v1/post',
-          method: 'get',
-          params: {
-            page: 1,
-            size: 0x7fffff,
-            orderByReply: this.orderByReply
-          },
-          headers: {
-            Authorization: this.$store.getters.getToken
-          }
-        })
-          .then(response => {
-            this.totalPosts = response.data.posts
             this.total = this.totalPosts.length
             // sort
             this.posts = this.totalPosts.sort(this.sortFunction)
@@ -181,7 +152,10 @@ export default {
             this.loading = false
           })
           .catch(error => {
-            window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+            console.log(error)
+            if (error.response) {
+              window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+            }
           })
       }
     },
@@ -205,7 +179,10 @@ export default {
           }
         })
         .catch(error => {
-          window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+          console.log(error)
+          if (error.response) {
+            window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+          }
         })
     },
     sortFunction (post1, post2) {

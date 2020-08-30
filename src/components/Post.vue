@@ -262,7 +262,10 @@ export default {
             }
           })
           .catch(error => {
-            window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+            console.log(error)
+            if (error.response) {
+              window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+            }
           })
       }
     },
@@ -292,7 +295,10 @@ export default {
           }
         })
         .catch(error => {
-          window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+          console.log(error)
+          if (error.response) {
+            window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+          }
         })
     }
   }
