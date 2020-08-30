@@ -1,4 +1,5 @@
 /* eslint-disable vue/no-unused-vars */
+
 <template>
   <div>
     <el-table
@@ -57,24 +58,10 @@
           <Tags :ableToEdit="false" :post="scope.row"></Tags>
         </template>
       </el-table-column>
-      <el-table-column
-        width="120px"
-        align="center"
-        fixed="right"
-        sortable
-        :sort-method="sortByUpdatedTime"
-        label="最近更新"
-      >
+      <el-table-column width="120px" align="center" fixed="right" sortable label="最近更新">
         <template slot-scope="scope">{{ scope.row.updated | formatTime }}</template>
       </el-table-column>
-      <el-table-column
-        width="120px"
-        align="center"
-        fixed="right"
-        sortable
-        :sort-method="sortByRepliedTime"
-        label="最近回复"
-      >
+      <el-table-column width="120px" align="center" fixed="right" sortable label="最近回复">
         <template slot-scope="scope">{{ scope.row.lastRepliedTime | formatTime }}</template>
       </el-table-column>
     </el-table>
@@ -83,6 +70,8 @@
 
 <script>
 import Tags from '@/components/Tags.vue'
+
+// :sort-method="sortByRepliedTime"
 
 export default {
   props: ['posts'],
@@ -101,7 +90,7 @@ export default {
         const bookmarks = this.$store.getters.getBookmark
         return id in bookmarks
       }
-    }
+    },
   },
   methods: {
     sortByUpdatedTime (obj1, obj2) {
@@ -119,16 +108,12 @@ export default {
     }
   },
   watch: {
-    tags: function (val) {
-      this.$store.commit('updateCurrentTags', val)
-      if (val.length > 0) {
-        this.$router.push(`/postslist/page=1/${JSON.stringify(val)}`)
-      } else {
-        this.$router.push('/postslist/page=1')
-      }
-    },
     search: function (val) {
       this.$emit('keywordChanged', val)
+    },
+    tags: function (val) {
+      this.$store.commit('updateCurrentTags', val)
+      this.$emit('tagsChanged', val)
     }
   }
 }

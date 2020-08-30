@@ -18,7 +18,7 @@ const routes: Array<RouteConfig> = [
     component: PostsList
   },
   {
-    path: '/postslist/page=:page/:tags?',
+    path: '/postslist/page=:page',
     name: 'PostsList',
     meta: { requireAuth: true },
     component: PostsList

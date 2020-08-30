@@ -3,7 +3,12 @@
     <!-- <div class="loading" v-if="loading">Loading...</div> -->
     <!-- <div v-else>
     <div>-->
-    <PostsTable :posts="posts" @sortChanged="changeSort" @keywordChanged="changeKeyword"></PostsTable>
+    <PostsTable
+      :posts="posts"
+      @sortChanged="changeSort"
+      @keywordChanged="changeKeyword"
+      @tagsChanged="changeTags"
+    ></PostsTable>
     <el-pagination
       ref="pagination"
       :total="total"
@@ -37,11 +42,14 @@ export default {
       title: '',
       keyword: '',
       page: (this.$route.name === 'Home') ? 1 : parseInt(this.$route.params.page),
-      orderByReply: false,
       pageSize: 15,
       loading: false,
       total: 0,
-      posts: []
+      posts: [],
+      totalPosts: [],
+      tags: this.$store.getters.getCurrentTags,
+      orderByReply: false,
+      order: null,
     }
   },
   components: {
@@ -50,6 +58,10 @@ export default {
     PostsTable
   },
   methods: {
+    changeTags (tags) {
+      this.tags = tags
+      this.loadData()
+    },
     changeKeyword (keyword) {
       this.keyword = keyword
       this.loadData()
@@ -60,14 +72,14 @@ export default {
       } else if (label === '最近回复') {
         this.orderByReply = true
       }
+      this.order = order
       this.loadData()
     },
     loadData () {
-      if (this.$route.params.tags) {
-        const tags = JSON.parse(this.$route.params.tags)
+      if (this.tags.length > 0) {
         const postsByTagDict = this.$store.getters.getPostsByTagDict
         const tagCount = {}
-        for (const tag of tags) {
+        for (const tag of this.tags) {
           for (const postId in postsByTagDict[tag]) {
             if (tagCount[postId]) {
               tagCount[postId]++
@@ -76,35 +88,79 @@ export default {
             }
           }
         }
-        this.posts = []
+        this.totalPosts = []
         for (const postId in tagCount) {
-          if (tagCount[postId] === tags.length) {
-            this.posts.push(postsByTagDict[tags[0]][postId])
+          if (tagCount[postId] === this.tags.length) {
+            this.totalPosts.push(postsByTagDict[this.tags[0]][postId])
           }
         }
+        // filter
+        this.totalPosts = this.totalPosts.filter(data => !this.keyword || data.title.toLowerCase().includes(this.keyword.toLowerCase()))
+        this.total = this.totalPosts.length
+        // sort
+        this.posts = this.totalPosts.sort(this.sortFunction)
+        // pagination
+        this.posts = this.totalPosts.splice((this.page - 1) * this.pageSize, this.page * this.pageSize)
 
-        this.total = this.posts.length
         this.loading = false
-
       } else if (this.keyword !== '') {
         this.$http({
           url: '/api/v1/post',
           method: 'get',
           params: {
             page: 1,
-            size: 0x7fffff
+            size: 0x7fffff,
+            orderByReply: this.orderByReply
           },
           headers: {
             Authorization: this.$store.getters.getToken
           }
         })
           .then(response => {
-            this.total = response.data.total
-            this.posts = response.data.posts
+            // filter
+            this.totalPosts = response.data.posts.filter(data => !this.keyword || data.title.toLowerCase().includes(this.keyword.toLowerCase()))
+            this.total = this.totalPosts.length
+            // sort
+            this.posts = this.totalPosts.sort(this.sortFunction)
+            // pagination
+            this.posts = this.totalPosts.slice((this.page - 1) * this.pageSize, this.page * this.pageSize)
+
             this.loading = false
           })
           .catch(error => {
-            window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+            console.log(error)
+            if (error.response) {
+              window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+            }
+          })
+      } else if (this.order) {
+        this.$http({
+          url: '/api/v1/post',
+          method: 'get',
+          params: {
+            page: 1,
+            size: 0x7fffff,
+            orderByReply: this.orderByReply
+          },
+          headers: {
+            Authorization: this.$store.getters.getToken
+          }
+        })
+          .then(response => {
+            this.totalPosts = response.data.posts
+            this.total = this.totalPosts.length
+            // sort
+            this.posts = this.totalPosts.sort(this.sortFunction)
+            // pagination
+            this.posts = this.totalPosts.slice((this.page - 1) * this.pageSize, this.page * this.pageSize)
+
+            this.loading = false
+          })
+          .catch(error => {
+            console.log(error)
+            if (error.response) {
+              window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+            }
           })
       } else {
         this.$http({
@@ -152,6 +208,21 @@ export default {
           window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
         })
     },
+    sortFunction (post1, post2) {
+      if (this.orderByReply) {
+        if (this.order === 'ascending') {
+          return new Date(post2.lastRepliedTime).getTime() - new Date(post1.lastRepliedTime).getTime()
+        } else {
+          return new Date(post1.lastRepliedTime).getTime() - new Date(post2.lastRepliedTime).getTime()
+        }
+      } else {
+        if (this.order === 'ascending') {
+          return new Date(post2.updated).getTime() - new Date(post1.updated).getTime()
+        } else {
+          return new Date(post1.updated).getTime() - new Date(post2.updated).getTime()
+        }
+      }
+    },
     changePage () {
       // if (this.$route.name === 'Home' && this.page === 1) {
       //   return
@@ -159,11 +230,7 @@ export default {
       // if (this.$route.params.page === this.page.toString()) {
       //   return
       // }
-      if (this.$route.params.tags) {
-        this.$router.push(`/postslist/page=${this.page}/${this.$route.params.tags}`)
-      } else {
-        this.$router.push(`/postslist/page=${this.page}`)
-      }
+      this.$router.push(`/postslist/page=${this.page}`)
     }
   },
   beforeMount () {
@@ -174,7 +241,7 @@ export default {
     $route: function (to, from) {
       this.loading = true
       this.loadData()
-    }
+    },
   }
 }
 </script>
