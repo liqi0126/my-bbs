@@ -49,7 +49,7 @@ export default {
       totalPosts: [],
       tags: this.$store.getters.getCurrentTags,
       orderByReply: false,
-      order: null,
+      order: null
     }
   },
   components: {
@@ -218,7 +218,7 @@ export default {
     $route: function (to, from) {
       this.loading = true
       this.loadData()
-    },
+    }
   }
 }
 </script>

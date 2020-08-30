@@ -49,7 +49,7 @@ export default {
       rootPost: {},
       posts: [],
       loadMoreDelta: 15,
-      loadedPostNum: 15,
+      loadedPostNum: 15
     }
   },
   components: {
@@ -102,7 +102,6 @@ export default {
             window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
           }
         })
-
     },
     loadMore () {
       if (this.showNum < this.posts.length) {

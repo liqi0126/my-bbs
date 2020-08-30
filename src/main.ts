@@ -43,7 +43,8 @@ router.beforeEach((to, from, next) => {
   }
 })
 
-Vue.filter('formatEmoji', function (str: string) {
+Vue.filter('formatEmoji', function (str) {
+  // eslint-disable-next-line
   return str.replace(/\[[^\[\]]*\]/g, (emojiText) => {
     if (store.state.emoji[emojiText]) {
       return '<img src=' + store.state.emoji[emojiText] + ' />'
@@ -53,7 +54,7 @@ Vue.filter('formatEmoji', function (str: string) {
   })
 })
 
-Vue.filter('formatTime', function (str: string) {
+Vue.filter('formatTime', function (str) {
   if (!str) return ''
   const date = new Date(str)
   const time = new Date().getTime() - date.getTime() // 现在的时间-传入的时间 = 相差的时间（单位 = 毫秒）
@@ -76,7 +77,7 @@ Vue.filter('formatTime', function (str: string) {
   }
 })
 
-Vue.filter('formatTitle', function (str: string) {
+Vue.filter('formatTitle', function (str) {
   if (!str || !str.trim()) { return '[无标题]' } else {
     return str
   }

@@ -90,7 +90,7 @@ export default {
         const bookmarks = this.$store.getters.getBookmark
         return id in bookmarks
       }
-    },
+    }
   },
   methods: {
     sortByUpdatedTime (obj1, obj2) {

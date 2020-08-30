@@ -50,7 +50,7 @@ const routes: Array<RouteConfig> = [
   },
   {
     path: '/test',
-    name: 'Test',
+    name: 'Test'
   }
 ]
 

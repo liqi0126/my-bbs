@@ -88,6 +88,14 @@ export default {
   beforeMount () {
     this.loading = true
     this.loadData()
+  },
+  watch: {
+    $route: function (to, from) {
+      if (from.name === 'Login') {
+        this.loading = true
+        this.loadData()
+      }
+    }
   }
 }
 </script>

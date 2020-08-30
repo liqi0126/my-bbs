@@ -47,7 +47,7 @@ export default {
       total: 0,
       posts: [],
       nickname: '',
-      loadNum: 5,
+      loadNum: 5
     }
   },
   components: {

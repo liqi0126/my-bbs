@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     logout () {
-      const headers = { 'Authorization': this.$store.getters.getToken }
+      const headers = { Authorization: this.$store.getters.getToken }
       this.$http.patch('/api/v1/logout', {}, { headers: headers })
         .then(response => {
           this.$store.commit('logout')

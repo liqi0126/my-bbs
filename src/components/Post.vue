@@ -160,17 +160,12 @@ export default {
       editTitle: '',
       openCollapse: false,
       toRenderRootEditor: false,
-      toRenderSubPostEditor: [],
+      toRenderSubPostEditor: []
     }
   },
   beforeMount () {
-    for (let i in this.post.reply) {
+    for (const i in this.post.reply) {
       this.toRenderSubPostEditor.push(false)
-    }
-  },
-  watch: {
-    openCollapse: function () {
-      console.log(val)
     }
   },
   // inject: ['reload'],
@@ -180,7 +175,7 @@ export default {
     },
 
     handleFigure (e) {
-      if (e.target.tagName === "IMG") {
+      if (e.target.tagName === 'IMG') {
         this.imgSrc = e.target.src
         this.dialogImgVisible = true
       }
@@ -304,7 +299,6 @@ export default {
   }
 }
 </script>
-
 
 <style scoped>
 .box::-webkit-scrollbar {
