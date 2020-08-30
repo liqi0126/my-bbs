@@ -125,11 +125,19 @@
           class="title-input"
         ></el-input>
       </div>
-      <Editor :id="`editEditor${post.id}`" ref="editEditor" style="padding:0px"></Editor>
+      <Editor
+        :id="`editEditor${post.id}`"
+        ref="editEditor"
+        style="padding:0px"
+        :visible.sync="dialogEditVisible"
+      ></Editor>
       <div slot="footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button @click="dialogEditVisible = false">取 消</el-button>
         <el-button type="primary" @click="submitEdit()">确 定</el-button>
       </div>
+    </el-dialog>
+    <el-dialog title="图片" :visible.sync="dialogImgVisible" custom-class="dialog" style="width=100%">
+      <img :src="imgSrc" style="max-width:100%" />
     </el-dialog>
   </el-container>
 </template>
@@ -146,6 +154,8 @@ export default {
   data () {
     return {
       dialogEditVisible: false,
+      dialogImgVisible: false,
+      imgSrc: '',
       editId: -1,
       editTitle: '',
       openCollapse: false,
@@ -170,18 +180,22 @@ export default {
     },
 
     handleFigure (e) {
-      if (e.target.tagName === 'IMG') {
-        if (e.target.style.maxWidth === '500px' || e.target.style.maxWidth === '') {
-          e.target.style.maxWidth = '99999px'
-        } else {
-          e.target.style.maxWidth = '500px'
-        }
-        if (e.target.style.maxHeight === '500px' || e.target.style.maxHeight === '') {
-          e.target.style.maxHeight = '99999px'
-        } else {
-          e.target.style.maxHeight = '500px'
-        }
+      if (e.target.tagName === "IMG") {
+        this.imgSrc = e.target.src
+        this.dialogImgVisible = true
       }
+      // if (e.target.tagName === 'IMG') {
+      //   if (e.target.style.maxWidth === '500px' || e.target.style.maxWidth === '') {
+      //     e.target.style.maxWidth = '99999px'
+      //   } else {
+      //     e.target.style.maxWidth = '500px'
+      //   }
+      //   if (e.target.style.maxHeight === '500px' || e.target.style.maxHeight === '') {
+      //     e.target.style.maxHeight = '99999px'
+      //   } else {
+      //     e.target.style.maxHeight = '500px'
+      //   }
+      // }
     },
 
     myPost (id) {
@@ -248,7 +262,7 @@ export default {
             }
           })
           .catch(error => {
-            console.log(error)
+            window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
           })
       }
     },
@@ -278,12 +292,13 @@ export default {
           }
         })
         .catch(error => {
-          console.log(error)
+          window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
         })
     }
   }
 }
 </script>
+
 
 <style scoped>
 .box::-webkit-scrollbar {

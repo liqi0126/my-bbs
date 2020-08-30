@@ -1,28 +1,27 @@
 <template>
   <div>
-    <div class="loading" v-if="loading">Loading...</div>
-    <div v-else>
-      <div>
-        <!-- <PostHead v-for="post in posts" :key="post.id" :post="post"></PostHead> -->
-        <PostsTable :posts="posts"></PostsTable>
-        <el-pagination
-          ref="pagination"
-          :total="total"
-          :current-page.sync="page"
-          @current-change="changePage"
-          :page-size.sync="pageSize"
-          style="margin-top:20px"
-        ></el-pagination>
+    <!-- <div class="loading" v-if="loading">Loading...</div> -->
+    <!-- <div v-else>
+    <div>-->
+    <PostsTable :posts="posts" @sortChanged="changeSort" @keywordChanged="changeKeyword"></PostsTable>
+    <el-pagination
+      ref="pagination"
+      :total="total"
+      :current-page.sync="page"
+      @current-change="changePage"
+      :page-size.sync="pageSize"
+      style="margin-top:20px"
+    ></el-pagination>
+    <!-- </div>
+    </div>-->
+    <el-divider class="divider">快来发表自己的帖子吧~</el-divider>
+    <div id="to-post">
+      <div class="row">
+        <span class="hint">标题:&nbsp;</span>
+        <el-input placeholder="建议不超过24个字" v-model="title" clearable class="title-input"></el-input>
       </div>
-      <el-divider class="divider">快来发表自己的帖子吧~</el-divider>
-      <div id="to-post">
-        <div class="row">
-          <span class="hint">标题:&nbsp;</span>
-          <el-input placeholder="建议不超过24个字" v-model="title" clearable class="title-input"></el-input>
-        </div>
-        <Editor id="postsListEditor" ref="editor"></Editor>
-        <el-button type="success" icon="el-icon-upload" class="submit" @click="submit">发表</el-button>
-      </div>
+      <Editor id="postsListEditor" ref="editor"></Editor>
+      <el-button type="success" icon="el-icon-upload" class="submit" @click="submit">发表</el-button>
     </div>
   </div>
 </template>
@@ -36,7 +35,9 @@ export default {
   data () {
     return {
       title: '',
+      keyword: '',
       page: (this.$route.name === 'Home') ? 1 : parseInt(this.$route.params.page),
+      orderByReply: false,
       pageSize: 15,
       loading: false,
       total: 0,
@@ -49,6 +50,18 @@ export default {
     PostsTable
   },
   methods: {
+    changeKeyword (keyword) {
+      this.keyword = keyword
+      this.loadData()
+    },
+    changeSort (label, order) {
+      if (label === '最近更新') {
+        this.orderByReply = false
+      } else if (label === '最近回复') {
+        this.orderByReply = true
+      }
+      this.loadData()
+    },
     loadData () {
       if (this.$route.params.tags) {
         const tags = JSON.parse(this.$route.params.tags)
@@ -72,13 +85,14 @@ export default {
 
         this.total = this.posts.length
         this.loading = false
-      } else {
+
+      } else if (this.keyword !== '') {
         this.$http({
           url: '/api/v1/post',
           method: 'get',
           params: {
-            page: this.page,
-            size: this.pageSize
+            page: 1,
+            size: 0x7fffff
           },
           headers: {
             Authorization: this.$store.getters.getToken
@@ -90,7 +104,28 @@ export default {
             this.loading = false
           })
           .catch(error => {
-            console.log(error)
+            window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+          })
+      } else {
+        this.$http({
+          url: '/api/v1/post',
+          method: 'get',
+          params: {
+            page: this.page,
+            size: this.pageSize,
+            orderByReply: this.orderByReply
+          },
+          headers: {
+            Authorization: this.$store.getters.getToken
+          }
+        })
+          .then(response => {
+            this.total = response.data.total
+            this.posts = response.data.posts
+            this.loading = false
+          })
+          .catch(error => {
+            window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
           })
       }
     },
@@ -114,7 +149,7 @@ export default {
           }
         })
         .catch(error => {
-          console.log(error)
+          window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
         })
     },
     changePage () {

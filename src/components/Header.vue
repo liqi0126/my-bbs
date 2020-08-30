@@ -14,7 +14,7 @@
         <el-menu-item index="2-4" @click="logout">登出</el-menu-item>
       </el-menu-item-group>
     </el-submenu>
-    <el-menu-item index="1">创建新帖</el-menu-item>
+    <el-menu-item index="1" @click="toEdit">创建新帖</el-menu-item>
   </el-menu>
 </template>
 
@@ -26,12 +26,22 @@ export default {
   },
   methods: {
     logout () {
-      this.$store.commit('logout')
-      this.$router.push('/login')
-      this.$alert('退出成功!')
+      const headers = { 'Authorization': this.$store.getters.getToken }
+      this.$http.patch('/api/v1/logout', {}, { headers: headers })
+        .then(response => {
+          this.$store.commit('logout')
+          this.$router.push('/login')
+          this.$alert('退出成功!')
+        })
+        .catch(error => {
+          window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+        })
     },
     toEdit () {
-      // TODO
+      if (this.$route.name !== 'Home' && this.$route.name !== 'PostsList') {
+        this.$router.push('/')
+      }
+      window.scrollTo(0, 10000)
     }
   }
 }

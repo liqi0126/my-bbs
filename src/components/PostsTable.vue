@@ -4,6 +4,7 @@
     <el-table
       :data="posts.filter(data => !search || data.title.toLowerCase().includes(search.toLowerCase()))"
       stripe
+      @sort-change="sortChanged"
     >
       <el-table-column type="expand">
         <template slot-scope="scope">{{ scope.row.content }}</template>
@@ -112,6 +113,9 @@ export default {
       const time1 = new Date(obj1.lastRepliedTime)
       const time2 = new Date(obj2.lastRepliedTime)
       return time1.getTime() - time2.getTime()
+    },
+    sortChanged ({ column, prop, order }) {
+      this.$emit('sortChanged', column.label, order)
     }
   },
   watch: {
@@ -122,6 +126,9 @@ export default {
       } else {
         this.$router.push('/postslist/page=1')
       }
+    },
+    search: function (val) {
+      this.$emit('keywordChanged', val)
     }
   }
 }

@@ -1,13 +1,13 @@
 <template>
   <div>
+    <div class="header">
+      <div class="title">{{ title | formatTitle }}</div>
+      <Tags :ableToEdit="true" :post="rootPost"></Tags>
+      <el-switch v-model="authorOnly" active-text="只看楼主"></el-switch>
+      <el-switch v-model="mark" active-text="收藏"></el-switch>
+    </div>
     <div v-if="loading">Loading...</div>
     <div v-else>
-      <div class="header">
-        <div class="title">{{ title | formatTitle }}</div>
-        <Tags :ableToEdit="true" :post="rootPost"></Tags>
-        <el-switch v-model="authorOnly" active-text="只看楼主"></el-switch>
-        <el-switch v-model="mark" active-text="收藏"></el-switch>
-      </div>
       <div>
         <Post
           @reflesh="loadData"
@@ -23,13 +23,13 @@
           </div>
         </div>
       </div>
-      <div class="footer">
-        <div class="row">
-          <span class="hint">回复楼主</span>
-        </div>
-        <Editor id="postPageEditor" ref="editor"></Editor>
-        <el-button type="success" icon="el-icon-upload" class="submit" @click="submit">发表</el-button>
+    </div>
+    <div class="footer">
+      <div class="row">
+        <span class="hint">回复楼主</span>
       </div>
+      <Editor id="postPageEditor" ref="editor"></Editor>
+      <el-button type="success" icon="el-icon-upload" class="submit" @click="submit">发表</el-button>
     </div>
   </div>
 </template>
@@ -79,7 +79,26 @@ export default {
   },
   methods: {
     submit () {
-      return 0
+      if (this.$refs.editor.content === '') {
+        this.$alert('说点东西再提交吧~')
+        return
+      }
+      this.$http({
+        url: `/api/v1/post/${this.rootPost.id}/reply`,
+        method: 'post',
+        data: {
+          content: this.$refs.editor.content
+        },
+        headers: {
+          Authorization: this.$store.getters.getToken
+        }
+      })
+        .then(response => {
+          this.loadData()
+        })
+        .catch(error => {
+          window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+        })
     },
     loadMore () {
       if (this.showNum < this.posts.length) {
@@ -195,20 +214,10 @@ export default {
             this.posts = authorsPosts
           }
 
-          // let totalPostNum = 0
-          // let i = 0
-          // while (i < this.posts.length) {
-          //   totalPostNum += 1 + this.posts[i].reply.length
-          //   i += 1
-          //   if (totalPostNum <= 15) {
-          //     this.showNum = i
-          //   }
-          // }
-
           this.loading = false
         })
         .catch(error => {
-          console.log(error)
+          window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
         })
     }
   },

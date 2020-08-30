@@ -44,7 +44,6 @@ router.beforeEach((to, from, next) => {
 })
 
 Vue.filter('formatEmoji', function (str: string) {
-  // eslint-disable-next-line
   return str.replace(/\[[^\[\]]*\]/g, (emojiText) => {
     if (store.state.emoji[emojiText]) {
       return '<img src=' + store.state.emoji[emojiText] + ' />'

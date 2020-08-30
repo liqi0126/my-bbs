@@ -43,13 +43,11 @@ export default {
             } else {
               this.$router.push('/')
             }
-            // TODO: add feature
           }
         })
         .catch((error) => {
-          this.$alert('账户或密码错误，请重新输入!')
+          window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
           this.passward = ''
-          console.log(error)
         })
     }
   }

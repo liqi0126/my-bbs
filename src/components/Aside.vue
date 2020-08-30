@@ -39,37 +39,40 @@ export default {
   },
   methods: {
     loadData () {
-      this.$http({
-        method: 'get',
-        url: '/api/v1/user',
-        headers: {
-          Authorization: this.$store.getters.getToken
-        }
-      })
-        .then(response => {
-          this.my = response.data
-          this.lastName = response.data.nickname[0]
+      if (this.$store.getters.getToken) {
+        this.$http({
+          method: 'get',
+          url: '/api/v1/user',
+          headers: {
+            Authorization: this.$store.getters.getToken
+          }
         })
-        .catch(error => {
-          console.log(error)
+          .then(response => {
+            this.my = response.data
+            this.lastName = response.data.nickname[0]
+          })
+          .catch(error => {
+            window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+          })
+
+        this.$http({
+          method: 'get',
+          url: 'api/v1/post',
+          params: {
+            userId: this.$store.getters.getUserId,
+            size: 0x7fffff
+          },
+          headers: {
+            Authorization: this.$store.getters.getToken
+          }
         })
-      this.$http({
-        method: 'get',
-        url: 'api/v1/post',
-        params: {
-          userId: this.$store.getters.getUserId,
-          size: 1000
-        },
-        headers: {
-          Authorization: this.$store.getters.getToken
-        }
-      })
-        .then(response => {
-          this.myPosts = response.data
-        })
-        .catch(error => {
-          console.log(error)
-        })
+          .then(response => {
+            this.myPosts = response.data
+          })
+          .catch(error => {
+            window.alert(`错误代码: ${error.response.status}\n错误信息: ` + error.response.data.message)
+          })
+      }
       this.myBrowse = this.$store.getters.getHistory
       this.myBookmark = this.$store.getters.getBookmark
 

@@ -175,12 +175,12 @@
 
         <span class="ql-formats">
           <button class="ql-image"></button>
-          <el-popover ref="popover" placement="top" width="400" v-model="popVisible">
+          <el-popover ref="popover" placement="top" width="400" v-model="imagePopVisible">
             <el-button class="image-url" slot="reference" icon="el-icon-upload" />
             <el-input v-model="imageUrl" placeholder="请输入图片URL"></el-input>
             <div style="text-align:center;margin-top:10px">
               <el-button type="success" icon="el-icon-check" round @click="addImageUrl"></el-button>
-              <el-button type="danger" icon="el-icon-delete" round @click="closePopover"></el-button>
+              <el-button type="danger" icon="el-icon-delete" round @click="closeImagePopover"></el-button>
             </div>
           </el-popover>
         </span>
@@ -192,13 +192,22 @@
 
         <span class="ql-formats">
           <button class="ql-blockquote"></button>
-          <el-button @click="codeBlock">
+          <el-button @click="setCodeBlock">
             <svg viewBox="0 0 18 18">
               <polyline class="ql-even ql-stroke" points="5 7 3 9 5 11" />
               <polyline class="ql-even ql-stroke" points="13 7 15 9 13 11" />
               <line class="ql-stroke" x1="10" x2="8" y1="5" y2="13" />
             </svg>
           </el-button>
+
+          <el-popover ref="popover" placement="top" width="400" v-model="codePopVisible">
+            <el-button slot="reference" icon="el-icon-edit-outline"></el-button>
+            <el-input type="textarea" autosize placeholder="请输入代码" v-model="code"></el-input>
+            <div style="text-align:center;margin-top:10px">
+              <el-button type="success" icon="el-icon-check" round @click="addCode"></el-button>
+              <el-button type="danger" icon="el-icon-delete" round @click="closeCodePopover"></el-button>
+            </div>
+          </el-popover>
         </span>
       </div>
     </quill-editor>
@@ -217,7 +226,9 @@ export default {
   // title: 'Register modules',
   data () {
     return {
-      popVisible: false,
+      imagePopVisible: false,
+      codePopVisible: false,
+      code: '',
       imageUrl: '',
       content: '',
       editorOption: {
@@ -246,10 +257,6 @@ export default {
     }
   },
   methods: {
-    // test () {
-    //   const quill = this.$refs.myTextEditor.quill
-    //   console.log(quill.getFormat())
-    // },
     onEditorChange (editor) {
       this.content = editor.html
     },
@@ -309,12 +316,22 @@ export default {
       const range = quill.selection.savedRange
       quill.insertText(range.index, emoji)
     },
+
     addImageUrl () {
       const quill = this.$refs.myTextEditor.quill
       const range = quill.selection.savedRange
-      quill.insertEmbed(range.index, 'image', this.imageUrl)
+      // quill.insertEmbed(range.index, 'image', this.imageUrl)
+      this.content += `<img src=${this.imageUrl} />`
       this.imageUrl = ''
-      this.popVisible = false
+      this.imagePopVisible = false
+    },
+
+    addCode () {
+      const quill = this.$refs.myTextEditor.quill
+      const range = quill.selection.savedRange
+      this.content += '<pre>' + this.code + '</pre>'
+      this.code = ''
+      this.codePopVisible = false
     },
 
     setHeaderLevelOne () {
@@ -373,7 +390,7 @@ export default {
       }
     },
 
-    codeBlock () {
+    setCodeBlock () {
       const quill = this.$refs.myTextEditor.quill
       const { index, length } = quill.selection.savedRange
       if (quill.getFormat()['code-block']) {
@@ -383,21 +400,20 @@ export default {
       }
     },
 
-    closePopover () {
+    closeImagePopover () {
       this.imageUrl = ''
-      this.popVisible = false
-    }
-  },
-  filters: {
-    setEmoji: function (msg) {
-      msg = msg.replace('[smile]', `<img src=${require('@/assets/logo.png')} />`)
-      return msg
+      this.imagePopVisible = false
+    },
+
+    closeCodePopover () {
+      this.code = ''
+      this.codePopVisible = false
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .editor {
   line-height: normal !important;
   margin: auto;
@@ -405,5 +421,22 @@ export default {
   margin-bottom: 80px;
   max-width: 900px;
   height: 200px;
+
+  .ql-snow .ql-picker.ql-size .ql-picker-label::before,
+  .ql-snow .ql-picker.ql-size .ql-picker-item::before {
+    content: "14px";
+  }
+  .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="small"]::before,
+  .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="small"]::before {
+    content: "10px";
+  }
+  .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="large"]::before,
+  .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="large"]::before {
+    content: "18px";
+  }
+  .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="huge"]::before,
+  .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="huge"]::before {
+    content: "32px";
+  }
 }
 </style>
